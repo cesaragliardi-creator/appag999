@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<!--
+  ================================================================
+  AG-999 NutriEngine v2.0 — Food & Hydration Tracker
+  Author  : Cesar Agliardi Pereira
+  Location: Gravataí, RS, Brasil
+  Framework: AG-999 Mathematical Engine — Proprietary
+  Copyright: Lei 9.610/98 — All rights reserved — 2026
+  SHA-256 : d4f9a2c1e7b5038c6d2f1a9e8b4c7f3d0a5e2c8b1f6d9a3e7b0c4f8d2a6e1c5
+  ================================================================
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AG-999 NutriEngine v2 — Tracker Alimentar & Hidratação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0b0e14; --bg2:#111520; --bg3:#181d2a; --bg4:#1c2235;
+  --border:#1e2535; --border2:#2a3348; --border3:#3a4870;
+  --text:#e2e8f0; --muted:#6b7a99; --faint:#3a4460; --dim:#8899bb;
+  --purple:#7c6fe0; --purple-l:#a89ff0; --purple-d:#4f46e5; --purple-bg:#1a1830;
+  --teal:#1db975; --teal-l:#6edea8; --teal-d:#0e6e48; --teal-bg:#0a1f16;
+  --amber:#f59e0b; --amber-l:#fcd34d; --amber-bg:#1e1500;
+  --coral:#e85d3b; --coral-l:#f4956b; --coral-bg:#1f0f0a;
+  --blue:#3b8add; --blue-l:#7bb8f0; --blue-bg:#0d1a2e; --blue-d:#1a3a6b;
+  --green:#22c55e; --green-bg:#0f2318;
+  --radius:8px; --radius2:12px;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border3);border-radius:2px;}
+
+/* ─── TOP BAR ─── */
+.topbar{
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:0 20px;height:56px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--purple-d),var(--purple));
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;font-weight:700;color:white;
+}
+.logo-name{font-size:15px;font-weight:600;color:var(--text);}
+.logo-name em{color:var(--purple-l);font-style:normal;}
+.logo-sub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:20px;}
+.live-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--teal);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.clock-block{text-align:right;}
+.clock{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);line-height:1;}
+.clock-date{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ─── IP BANNER ─── */
+.ip-bar{
+  background:rgba(79,70,229,0.06);
+  border-bottom:1px solid rgba(79,70,229,0.15);
+  padding:4px 20px;font-family:var(--mono);font-size:8.5px;
+  color:rgba(168,159,240,0.5);letter-spacing:.08em;
+  display:flex;justify-content:space-between;
+}
+
+/* ─── LAYOUT ─── */
+.shell{display:grid;grid-template-columns:320px 1fr 300px;gap:0;min-height:calc(100vh - 82px);}
+
+/* ─── PANEL (sidebar-like columns) ─── */
+.panel{
+  padding:16px;display:flex;flex-direction:column;gap:14px;
+  overflow-y:auto;max-height:calc(100vh - 82px);
+}
+.panel-left{background:var(--bg2);border-right:1px solid var(--border);}
+.panel-center{background:var(--bg);padding:16px 20px;}
+.panel-right{background:var(--bg2);border-left:1px solid var(--border);}
+
+/* ─── CARD ─── */
+.card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:16px;
+}
+.card-title{
+  font-size:9px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1.2px;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.card-title em{font-style:normal;font-family:var(--mono);color:var(--purple);}
+.accent-bar{width:3px;height:12px;border-radius:2px;background:var(--purple);flex-shrink:0;}
+.accent-bar.teal{background:var(--teal);}
+.accent-bar.blue{background:var(--blue);}
+.accent-bar.amber{background:var(--amber);}
+
+/* ─── FORM ELEMENTS ─── */
+.form-group{margin-bottom:10px;}
+.form-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;display:block;font-family:var(--mono);}
+.form-input{
+  width:100%;background:var(--bg);border:1px solid var(--border2);
+  border-radius:6px;padding:8px 10px;color:var(--text);
+  font-family:var(--sans);font-size:13px;outline:none;
+  transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--purple);}
+.form-input::placeholder{color:var(--faint);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+
+select.form-input{cursor:pointer;}
+select.form-input option{background:var(--bg3);}
+
+.btn{
+  padding:9px 14px;border-radius:7px;font-family:var(--sans);
+  font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .15s;border:1px solid var(--border2);
+  background:var(--bg4);color:var(--text);
+}
+.btn:hover{border-color:var(--purple);background:var(--purple-bg);}
+.btn-primary{
+  background:linear-gradient(135deg,var(--purple-d),var(--purple));
+  border:none;color:white;font-weight:600;
+}
+.btn-primary:hover{opacity:.9;}
+.btn-teal{
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  border:none;color:white;font-weight:600;
+}
+.btn-teal:hover{opacity:.9;}
+.btn-block{width:100%;text-align:center;}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:5px;}
+
+/* ─── MACRO TYPE SELECTOR ─── */
+.macro-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;}
+.mtype-btn{
+  padding:6px 4px;border-radius:6px;text-align:center;cursor:pointer;
+  border:1px solid var(--border2);background:var(--bg);
+  font-size:10px;font-family:var(--mono);transition:all .15s;color:var(--muted);
+}
+.mtype-btn.active-p{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-l);}
+.mtype-btn.active-c{border-color:var(--amber);background:var(--amber-bg);color:var(--amber-l);}
+.mtype-btn.active-f{border-color:var(--coral);background:var(--coral-bg);color:var(--coral-l);}
+.mtype-btn.active-v{border-color:var(--teal);background:var(--teal-bg);color:var(--teal-l);}
+
+/* ─── FOOD LOG ─── */
+.log-entry{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:8px;
+  margin-bottom:6px;position:relative;
+  transition:border-color .2s;
+  animation:slideIn .25s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.log-entry:hover{border-color:var(--border2);}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.log-dot-p{background:var(--blue);}
+.log-dot-c{background:var(--amber);}
+.log-dot-f{background:var(--coral);}
+.log-dot-v{background:var(--teal);}
+.log-dot-o{background:var(--purple);}
+.log-info{flex:1;}
+.log-name{font-size:13px;font-weight:500;color:var(--text);}
+.log-meta{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
+.log-kcal{
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--purple-l);min-width:60px;text-align:right;
+}
+.log-time{
+  font-family:var(--mono);font-size:10px;color:var(--faint);
+  min-width:40px;text-align:right;
+}
+.log-delete{
+  background:none;border:none;color:var(--faint);cursor:pointer;
+  font-size:14px;padding:2px 4px;border-radius:4px;
+  transition:color .15s;
+}
+.log-delete:hover{color:var(--coral);}
+
+/* ─── EMPTY STATE ─── */
+.empty-state{
+  text-align:center;padding:40px 20px;color:var(--faint);
+  font-size:12px;
+}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.4;}
+
+/* ─── PROGRESS BAR ─── */
+.progress-wrap{margin-bottom:12px;}
+.progress-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.progress-label{font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px;}
+.progress-val{font-family:var(--mono);font-size:13px;font-weight:700;}
+.progress-bar{
+  height:6px;background:var(--bg);border-radius:3px;overflow:hidden;
+  border:1px solid var(--border);
+}
+.progress-fill{
+  height:100%;border-radius:3px;
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.fill-purple{background:linear-gradient(90deg,var(--purple-d),var(--purple));}
+.fill-blue{background:linear-gradient(90deg,var(--blue-d),var(--blue));}
+.fill-teal{background:linear-gradient(90deg,var(--teal-d),var(--teal));}
+.fill-amber{background:linear-gradient(90deg,#92400e,var(--amber));}
+.fill-coral{background:linear-gradient(90deg,#7f1d1d,var(--coral));}
+
+/* ─── BIG NUMBER ─── */
+.big-stat{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:16px;
+  background:var(--bg);border-radius:10px;border:1px solid var(--border);
+}
+.big-num{font-family:var(--mono);font-size:36px;font-weight:700;line-height:1;}
+.big-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;}
+.big-sub{font-size:10px;color:var(--faint);font-family:var(--mono);margin-top:2px;}
+
+/* ─── RING ─── */
+.ring-wrap{position:relative;width:110px;height:110px;margin:0 auto 14px;}
+.ring-svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--border2);stroke-width:9;}
+.ring-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1);}
+.ring-text{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;
+}
+.ring-pct{font-family:var(--mono);font-size:20px;font-weight:700;display:block;line-height:1;}
+.ring-sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+
+/* ─── MINI STATS ROW ─── */
+.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mini-stat{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:10px 8px;text-align:center;
+}
+.mini-num{font-family:var(--mono);font-size:16px;font-weight:700;}
+.mini-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* ─── WATER SECTION ─── */
+.water-slots{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.water-slot{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border-radius:7px;border:1px solid var(--border);
+  background:var(--bg);cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.water-slot:hover{border-color:var(--blue);background:var(--blue-bg);}
+.water-slot.done{
+  border-color:var(--teal-d);background:var(--teal-bg);
+}
+.water-slot.next-up{
+  border-color:var(--blue);background:var(--blue-bg);
+  box-shadow:0 0 0 1px var(--blue);
+}
+.water-slot.past{opacity:.55;}
+.water-chk{
+  width:16px;height:16px;border-radius:50%;
+  border:1.5px solid var(--border3);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;transition:all .2s;
+}
+.water-slot.done .water-chk{
+  background:var(--teal);border-color:var(--teal);color:white;
+}
+.water-time-txt{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--blue-l);}
+.water-slot.done .water-time-txt{color:var(--teal-l);}
+.water-ml{font-size:10px;color:var(--muted);margin-left:auto;font-family:var(--mono);}
+.water-note-txt{font-size:9px;color:var(--faint);margin-left:auto;}
+
+/* ─── QUICK LOG WATER ─── */
+.quick-water{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.qw-btn{
+  padding:8px 6px;border-radius:7px;text-align:center;
+  border:1px solid var(--blue-d);background:var(--blue-bg);
+  cursor:pointer;transition:all .15s;font-family:var(--mono);
+  font-size:11px;color:var(--blue-l);
+}
+.qw-btn:hover{background:var(--blue);color:white;transform:translateY(-1px);}
+
+/* ─── TODAY SUMMARY ─── */
+.summary-macros{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.macro-block{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:10px;
+}
+.macro-block-num{font-family:var(--mono);font-size:18px;font-weight:700;}
+.macro-block-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;}
+
+/* ─── GOAL INPUT ─── */
+.goal-row{display:flex;align-items:center;gap:8px;}
+.goal-input{
+  width:90px;background:var(--bg);border:1px solid var(--border2);
+  border-radius:6px;padding:6px 8px;color:var(--text);
+  font-family:var(--mono);font-size:13px;text-align:center;outline:none;
+}
+.goal-input:focus{border-color:var(--purple);}
+
+/* ─── TIMELINE (center) ─── */
+.timeline{position:relative;padding-left:36px;}
+.timeline-line{
+  position:absolute;left:13px;top:8px;bottom:8px;width:2px;
+  background:linear-gradient(to bottom,var(--purple),var(--teal));
+  border-radius:1px;
+}
+.tl-item{position:relative;margin-bottom:10px;}
+.tl-dot{
+  position:absolute;left:-29px;top:12px;
+  width:10px;height:10px;border-radius:50%;border:2px solid var(--bg);z-index:2;
+}
+.tl-dot-p{background:var(--blue);}
+.tl-dot-c{background:var(--amber);}
+.tl-dot-f{background:var(--coral);}
+.tl-dot-v{background:var(--teal);}
+.tl-dot-o{background:var(--purple);}
+.tl-dot-w{background:var(--blue-l);box-shadow:0 0 6px var(--blue);}
+
+.tl-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;
+  transition:border-color .2s;
+}
+.tl-card:hover{border-color:var(--border2);}
+.tl-card-name{flex:1;font-size:13px;font-weight:500;}
+.tl-card-qty{font-size:11px;color:var(--muted);margin-top:1px;font-family:var(--mono);}
+.tl-kcal{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--purple-l);}
+.tl-time{font-family:var(--mono);font-size:10px;color:var(--faint);}
+.tl-tag{
+  font-size:9px;font-family:var(--mono);padding:2px 6px;
+  border-radius:4px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;
+}
+.tag-p{background:var(--blue-bg);color:var(--blue-l);border:1px solid var(--blue-d);}
+.tag-c{background:var(--amber-bg);color:var(--amber-l);border:1px solid rgba(180,83,9,.3);}
+.tag-f{background:var(--coral-bg);color:var(--coral-l);border:1px solid rgba(232,93,59,.2);}
+.tag-v{background:var(--teal-bg);color:var(--teal-l);border:1px solid var(--teal-d);}
+.tag-o{background:var(--purple-bg);color:var(--purple-l);border:1px solid var(--purple-d);}
+.tag-w{background:var(--blue-bg);color:var(--blue-l);border:1px solid var(--blue-d);}
+
+.center-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.center-title{font-size:15px;font-weight:600;color:var(--text);}
+.center-sub{font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+/* ─── NEXT WATER ALERT ─── */
+.next-water-banner{
+  background:var(--blue-bg);border:1px solid var(--blue-d);
+  border-radius:8px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.nw-icon{font-size:20px;}
+.nw-text{flex:1;}
+.nw-title{font-size:12px;font-weight:600;color:var(--blue-l);}
+.nw-sub{font-size:10px;color:var(--muted);font-family:var(--mono);}
+.nw-time{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--blue);}
+
+/* ─── TIPS ─── */
+.tip-card{
+  background:var(--teal-bg);border:1px solid var(--teal-d);
+  border-radius:8px;padding:12px 14px;
+}
+.tip-title{font-size:9px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.tip-item{font-size:11px;color:var(--dim);line-height:1.7;padding-left:10px;position:relative;}
+.tip-item::before{content:'·';position:absolute;left:0;color:var(--teal);}
+
+/* ─── TOAST ─── */
+.toast{
+  position:fixed;bottom:20px;right:20px;z-index:999;
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:8px;padding:10px 16px;
+  font-size:12px;color:var(--text);
+  box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:8px;
+  transform:translateX(120%);transition:transform .3s ease;
+  max-width:280px;
+}
+.toast.show{transform:translateX(0);}
+.toast-icon{font-size:16px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:1100px){
+  .shell{grid-template-columns:280px 1fr 260px;}
+}
+@media(max-width:820px){
+  .shell{grid-template-columns:1fr;grid-template-rows:auto;}
+  .panel{max-height:none;}
+  .panel-left,.panel-right{border:none;border-bottom:1px solid var(--border);}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── TOPBAR ─── -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">AG</div>
+    <div>
+      <div class="logo-name">AG-999 <em>NutriEngine</em></div>
+      <div class="logo-sub">v2.0 — Food & Hydration Tracker</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      ATIVO
+    </div>
+    <div class="clock-block">
+      <div class="clock" id="clock">00:00</div>
+      <div class="clock-date" id="clockDate">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- IP BAR -->
+<div class="ip-bar">
+  <span>© 2026 César Agliardi Pereira · Lei 9.610/98 · AG-999 Framework</span>
+  <span id="sha">SHA-256: d4f9a2c1e7b5038c6d2f1a9e8b4c7f3d0a5e2c8b1f6d9a3e7b0c4f8d2a6e1c5</span>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon">✓</span>
+  <span id="toastMsg">Registrado!</span>
+</div>
+
+<!-- ─── SHELL ─── -->
+<div class="shell">
+
+  <!-- ════ LEFT PANEL — ENTRADA ════ -->
+  <div class="panel panel-left">
+
+    <!-- META GOAL -->
+    <div class="card">
+      <div class="card-title"><div class="accent-bar"></div> Meta Calórica <em>Diária</em></div>
+      <div class="goal-row">
+        <input type="number" id="goalInput" class="goal-input" value="2000" min="800" max="5000" step="50">
+        <span style="font-size:11px;color:var(--muted);font-family:var(--mono);">kcal / dia</span>
+        <button class="btn btn-sm" onclick="updateGoal()">✓ OK</button>
+      </div>
+    </div>
+
+    <!-- REGISTRAR ALIMENTO -->
+    <div class="card">
+      <div class="card-title"><div class="accent-bar"></div> Registrar Alimento</div>
+
+      <div class="form-group">
+        <label class="form-label">Alimento / Descrição</label>
+        <input type="text" id="foodName" class="form-input" placeholder="Ex: Arroz integral cozido">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Quantidade</label>
+          <input type="text" id="foodQty" class="form-input" placeholder="Ex: 150g">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Horário</label>
+          <input type="time" id="foodTime" class="form-input" value="">
+        </div>
+      </div>
+
+      <div class="form-row3">
+        <div class="form-group">
+          <label class="form-label">Kcal</label>
+          <input type="number" id="foodKcal" class="form-input" placeholder="—" min="0" max="9999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prot (g)</label>
+          <input type="number" id="foodProt" class="form-input" placeholder="—" min="0" max="999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Carbo (g)</label>
+          <input type="number" id="foodCarb" class="form-input" placeholder="—" min="0" max="999">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Gordura (g)</label>
+          <input type="number" id="foodFat" class="form-input" placeholder="—" min="0" max="999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select id="foodType" class="form-input">
+            <option value="p">🔵 Proteína</option>
+            <option value="c" selected>🟡 Carboidrato</option>
+            <option value="f">🔴 Gordura</option>
+            <option value="v">🟢 Vegetal/Fruta</option>
+            <option value="o">🟣 Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SUGESTÕES RÁPIDAS -->
+      <div style="margin-bottom:10px;">
+        <div class="form-label" style="margin-bottom:6px;">Sugestões rápidas</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;" id="quickFoods">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block" onclick="addFood()">+ Registrar Alimento</button>
+    </div>
+
+    <!-- ÁGUA RÁPIDA -->
+    <div class="card">
+      <div class="card-title"><div class="accent-bar blue"></div> Log Rápido de Água</div>
+      <div class="quick-water">
+        <div class="qw-btn" onclick="logWater(150)">💧 150ml</div>
+        <div class="qw-btn" onclick="logWater(200)">💧 200ml</div>
+        <div class="qw-btn" onclick="logWater(250)">💧 250ml</div>
+        <div class="qw-btn" onclick="logWater(300)">💧 300ml</div>
+        <div class="qw-btn" onclick="logWater(400)">💧 400ml</div>
+        <div class="qw-btn" onclick="logWater(500)">💧 500ml</div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:6px;align-items:center;">
+        <input type="number" id="customWater" class="form-input" placeholder="Outro (ml)" min="50" max="2000" style="flex:1;">
+        <button class="btn btn-teal btn-sm" onclick="logWaterCustom()">+ Log</button>
+      </div>
+    </div>
+
+    <!-- DICAS AG-999 -->
+    <div class="tip-card">
+      <div class="tip-title">⚡ Protocolo AG-999</div>
+      <div class="tip-item">Hidratação constante otimiza absorção de nutrientes</div>
+      <div class="tip-item">Espaçamento φ (1.618) entre refeições maximiza metabolismo</div>
+      <div class="tip-item">Proteína distribuída preserva massa muscular</div>
+      <div class="tip-item">Última refeição 2h antes de dormir</div>
+    </div>
+
+  </div><!-- end panel-left -->
+
+  <!-- ════ CENTER PANEL — TIMELINE ════ -->
+  <div class="panel panel-center">
+
+    <div class="center-header">
+      <div>
+        <div class="center-title">📋 Diário de Hoje</div>
+        <div class="center-sub" id="centerSub">Nenhum registro ainda</div>
+      </div>
+      <button class="btn btn-sm" onclick="clearDay()" style="color:var(--coral);border-color:rgba(232,93,59,.3);">🗑 Limpar dia</button>
+    </div>
+
+    <!-- PRÓXIMA ÁGUA -->
+    <div class="next-water-banner" id="nextWaterBanner">
+      <div class="nw-icon">💧</div>
+      <div class="nw-text">
+        <div class="nw-title">Próxima hidratação</div>
+        <div class="nw-sub" id="nextWaterNote">—</div>
+      </div>
+      <div class="nw-time" id="nextWaterTime">—</div>
+    </div>
+
+    <!-- TIMELINE LOG -->
+    <div class="timeline" id="timeline">
+      <div class="timeline-line"></div>
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🍽</div>
+        <div>Nenhum alimento registrado ainda</div>
+        <div style="margin-top:6px;font-size:11px;">Use o painel à esquerda para começar</div>
+      </div>
+    </div>
+
+  </div><!-- end panel-center -->
+
+  <!-- ════ RIGHT PANEL — STATS & HIDRATAÇÃO ════ -->
+  <div class="panel panel-right">
+
+    <!-- CALORIA RING -->
+    <div class="card" style="text-align:center;">
+      <div class="card-title" style="justify-content:center;"><div class="accent-bar"></div> Calorias Hoje <em>Total</em></div>
+      
+      <div class="ring-wrap">
+        <svg class="ring-svg" width="110" height="110" viewBox="0 0 110 110">
+          <circle class="ring-bg" cx="55" cy="55" r="46"/>
+          <circle class="ring-fill" cx="55" cy="55" r="46"
+            stroke="url(#calGrad)"
+            stroke-dasharray="289.03"
+            stroke-dashoffset="289.03"
+            id="calRing"/>
+          <defs>
+            <linearGradient id="calGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#7c6fe0;stop-opacity:1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="ring-text">
+          <span class="ring-pct" style="color:var(--purple-l);" id="calPct">0%</span>
+          <span class="ring-sub">da meta</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div class="mini-stat">
+          <div class="mini-num" style="color:var(--purple-l);" id="totalKcal">0</div>
+          <div class="mini-label">kcal hoje</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-num" style="color:var(--faint);" id="remainKcal">2000</div>
+          <div class="mini-label">restante</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill fill-purple" id="calBar" style="width:0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MACROS HOJE -->
+    <div class="card">
+      <div class="card-title"><div class="accent-bar"></div> Macros do Dia</div>
+      <div class="summary-macros">
+        <div class="macro-block">
+          <div class="macro-block-num" style="color:var(--blue-l);" id="sumProt">0g</div>
+          <div class="macro-block-label">Proteína</div>
+          <div style="margin-top:6px;">
+            <div class="progress-bar"><div class="progress-fill fill-blue" id="protBar" style="width:0%;"></div></div>
+          </div>
+        </div>
+        <div class="macro-block">
+          <div class="macro-block-num" style="color:var(--amber-l);" id="sumCarb">0g</div>
+          <div class="macro-block-label">Carboidrato</div>
+          <div style="margin-top:6px;">
+            <div class="progress-bar"><div class="progress-fill fill-amber" id="carbBar" style="width:0%;"></div></div>
+          </div>
+        </div>
+        <div class="macro-block">
+          <div class="macro-block-num" style="color:var(--coral-l);" id="sumFat">0g</div>
+          <div class="macro-block-label">Gordura</div>
+          <div style="margin-top:6px;">
+            <div class="progress-bar"><div class="progress-fill fill-coral" id="fatBar" style="width:0%;"></div></div>
+          </div>
+        </div>
+        <div class="macro-block">
+          <div class="macro-block-num" style="color:var(--teal-l);" id="sumItems">0</div>
+          <div class="macro-block-label">Registros</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÁGUA HOJE -->
+    <div class="card">
+      <div class="card-title"><div class="accent-bar blue"></div> Hidratação <em>Hoje</em></div>
+      
+      <div class="ring-wrap" style="width:90px;height:90px;margin:0 auto 12px;">
+        <svg class="ring-svg" width="90" height="90" viewBox="0 0 90 90">
+          <circle class="ring-bg" cx="45" cy="45" r="37" stroke-width="8"/>
+          <circle class="ring-fill" cx="45" cy="45" r="37"
+            stroke="url(#waterGrad)" stroke-width="8"
+            stroke-dasharray="232.48"
+            stroke-dashoffset="232.48"
+            id="waterRing"/>
+          <defs>
+            <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#1a3a6b;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#3b8add;stop-opacity:1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="ring-text">
+          <span class="ring-pct" style="color:var(--blue-l);" id="waterPct">0%</span>
+          <span class="ring-sub">2.8L meta</span>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--blue);" id="waterTotal">0ml</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">de 2800ml · <span id="waterRemain">2800ml</span> restante</div>
+      </div>
+
+      <div class="progress-bar" style="margin-bottom:14px;">
+        <div class="progress-fill fill-blue" id="waterBar" style="width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- HORÁRIOS DE ÁGUA -->
+    <div class="card">
+      <div class="card-title"><div class="accent-bar blue"></div> Agenda de Hidratação <em>Horários</em></div>
+      <div class="water-slots" id="waterSchedule">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div><!-- end panel-right -->
+
+</div><!-- end shell -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  AG-999 NutriEngine v2.0 — State & Logic
+// ══════════════════════════════════════════════════════════════
+
+const WATER_GOAL = 2800; // ml
+let kcalGoal = 2000;
+let entries = []; // {id, time, name, qty, kcal, prot, carb, fat, type}
+let waterLog = []; // {time, ml}
+
+// Water schedule
+const WATER_SCHEDULE = [
+  {id:'w1', time:'06:30', ml:300, note:'Ao acordar, em jejum'},
+  {id:'w2', time:'08:30', ml:300, note:'Pós café da manhã'},
+  {id:'w3', time:'10:30', ml:300, note:'Meio da manhã'},
+  {id:'w4', time:'12:00', ml:200, note:'Pré almoço'},
+  {id:'w5', time:'14:00', ml:300, note:'Pós almoço'},
+  {id:'w6', time:'16:00', ml:400, note:'Tarde (pré-treino)'},
+  {id:'w7', time:'18:00', ml:400, note:'Durante atividade'},
+  {id:'w8', time:'20:00', ml:300, note:'Pós jantar'},
+  {id:'w9', time:'21:30', ml:200, note:'Antes de dormir'},
+  {id:'w10',time:'22:30', ml:100, note:'Última hidratação'},
+];
+
+const scheduleDone = new Set(); // ids of done schedule slots
+
+// Quick food suggestions
+const QUICK_FOODS = [
+  {name:'Arroz integral',qty:'150g',kcal:195,prot:4,carb:42,fat:1,type:'c'},
+  {name:'Frango grelhado',qty:'100g',kcal:165,prot:31,carb:0,fat:4,type:'p'},
+  {name:'Ovo cozido',qty:'1 un',kcal:78,prot:6,carb:0,fat:5,type:'p'},
+  {name:'Banana',qty:'1 média',kcal:89,prot:1,carb:23,fat:0,type:'v'},
+  {name:'Batata doce',qty:'100g',kcal:86,prot:2,carb:20,fat:0,type:'c'},
+  {name:'Feijão cozido',qty:'100g',kcal:77,prot:5,carb:14,fat:0,type:'c'},
+  {name:'Pão integral',qty:'1 fatia',kcal:80,prot:4,carb:15,fat:1,type:'c'},
+  {name:'Abacate',qty:'½ un',kcal:120,prot:1,carb:6,fat:11,type:'f'},
+  {name:'Iogurte natural',qty:'170g',kcal:100,prot:10,carb:7,fat:3,type:'p'},
+  {name:'Whey protein',qty:'1 scoop',kcal:120,prot:25,carb:3,fat:1,type:'p'},
+  {name:'Café preto',qty:'200ml',kcal:5,prot:0,carb:1,fat:0,type:'v'},
+  {name:'Água',qty:'500ml',kcal:0,prot:0,carb:0,fat:0,type:'v'},
+];
+
+// ─── INIT ───────────────────────────────────────────────────
+function init() {
+  // Load from localStorage
+  try {
+    const saved = localStorage.getItem('ag999_nutri_v2');
+    if (saved) {
+      const state = JSON.parse(saved);
+      entries = state.entries || [];
+      waterLog = state.waterLog || [];
+      kcalGoal = state.kcalGoal || 2000;
+      (state.scheduleDone || []).forEach(id => scheduleDone.add(id));
+    }
+  } catch(e) {}
+
+  document.getElementById('goalInput').value = kcalGoal;
+  setCurrentTime();
+  buildQuickFoods();
+  buildWaterSchedule();
+  render();
+  setInterval(updateClock, 1000);
+  setInterval(updateNextWater, 30000);
+}
+
+// ─── PERSIST ────────────────────────────────────────────────
+function persist() {
+  try {
+    localStorage.setItem('ag999_nutri_v2', JSON.stringify({
+      entries, waterLog, kcalGoal,
+      scheduleDone: [...scheduleDone]
+    }));
+  } catch(e) {}
+}
+
+// ─── CLOCK ──────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('clockDate').textContent =
+    now.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+  updateNextWater();
+  updateWaterScheduleStatus();
+}
+
+function setCurrentTime() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('foodTime').value = hh + ':' + mm;
+  updateClock();
+}
+
+// ─── FOOD ENTRY ─────────────────────────────────────────────
+function addFood() {
+  const name = document.getElementById('foodName').value.trim();
+  const qty  = document.getElementById('foodQty').value.trim();
+  const time = document.getElementById('foodTime').value;
+  const kcal = parseFloat(document.getElementById('foodKcal').value) || 0;
+  const prot = parseFloat(document.getElementById('foodProt').value) || 0;
+  const carb = parseFloat(document.getElementById('foodCarb').value) || 0;
+  const fat  = parseFloat(document.getElementById('foodFat').value) || 0;
+  const type = document.getElementById('foodType').value;
+
+  if (!name) { showToast('⚠️ Informe o nome do alimento', '#f59e0b'); return; }
+
+  const entry = {
+    id: Date.now(),
+    time: time || '00:00',
+    name, qty, kcal, prot, carb, fat, type
+  };
+  entries.push(entry);
+  entries.sort((a,b) => a.time.localeCompare(b.time));
+
+  // Reset form
+  document.getElementById('foodName').value = '';
+  document.getElementById('foodQty').value = '';
+  document.getElementById('foodKcal').value = '';
+  document.getElementById('foodProt').value = '';
+  document.getElementById('foodCarb').value = '';
+  document.getElementById('foodFat').value = '';
+  const now = new Date();
+  document.getElementById('foodTime').value =
+    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+  persist();
+  render();
+  showToast('✓ ' + name + ' registrado!', '#7c6fe0');
+}
+
+// ─── QUICK FOOD ──────────────────────────────────────────────
+function buildQuickFoods() {
+  const container = document.getElementById('quickFoods');
+  container.innerHTML = QUICK_FOODS.map(f => `
+    <button class="btn btn-sm"
+      style="font-size:10px;padding:4px 8px;border-radius:5px;background:var(--bg4);border-color:var(--border2);"
+      onclick="fillQuick(${QUICK_FOODS.indexOf(f)})">${f.name}</button>
+  `).join('');
+}
+
+function fillQuick(idx) {
+  const f = QUICK_FOODS[idx];
+  document.getElementById('foodName').value = f.name;
+  document.getElementById('foodQty').value  = f.qty;
+  document.getElementById('foodKcal').value = f.kcal;
+  document.getElementById('foodProt').value = f.prot;
+  document.getElementById('foodCarb').value = f.carb;
+  document.getElementById('foodFat').value  = f.fat;
+  document.getElementById('foodType').value = f.type;
+  document.getElementById('foodName').focus();
+}
+
+// ─── DELETE ENTRY ────────────────────────────────────────────
+function deleteEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  persist();
+  render();
+  showToast('🗑 Registro removido', '#e85d3b');
+}
+
+// ─── WATER LOG ───────────────────────────────────────────────
+function logWater(ml) {
+  const now = new Date();
+  const time = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  waterLog.push({time, ml});
+  persist();
+  render();
+  showToast('💧 +' + ml + 'ml registrado!', '#3b8add');
+}
+
+function logWaterCustom() {
+  const ml = parseInt(document.getElementById('customWater').value);
+  if (!ml || ml < 10) { showToast('⚠️ Informe um valor válido', '#f59e0b'); return; }
+  logWater(ml);
+  document.getElementById('customWater').value = '';
+}
+
+function toggleSchedule(id, ml) {
+  if (scheduleDone.has(id)) {
+    scheduleDone.delete(id);
+    // remove last water entry close to this time if exists
+  } else {
+    scheduleDone.add(id);
+    logWater(ml);
+  }
+  persist();
+  render();
+}
+
+// ─── GOAL ────────────────────────────────────────────────────
+function updateGoal() {
+  const val = parseInt(document.getElementById('goalInput').value);
+  if (val >= 800 && val <= 5000) {
+    kcalGoal = val;
+    persist();
+    render();
+    showToast('✓ Meta atualizada: ' + val + ' kcal', '#7c6fe0');
+  }
+}
+
+function clearDay() {
+  if (!confirm('Apagar todos os registros de hoje?')) return;
+  entries = [];
+  waterLog = [];
+  scheduleDone.clear();
+  persist();
+  render();
+  showToast('🗑 Dia limpo', '#e85d3b');
+}
+
+// ─── RENDER ──────────────────────────────────────────────────
+function render() {
+  renderTimeline();
+  renderStats();
+  renderWaterSchedule();
+  updateNextWater();
+}
+
+function renderStats() {
+  const totalKcal = entries.reduce((s,e) => s + (e.kcal||0), 0);
+  const totalProt = entries.reduce((s,e) => s + (e.prot||0), 0);
+  const totalCarb = entries.reduce((s,e) => s + (e.carb||0), 0);
+  const totalFat  = entries.reduce((s,e) => s + (e.fat||0), 0);
+  const totalWml  = waterLog.reduce((s,w) => s + w.ml, 0);
+
+  // Calorie ring
+  const calPct = Math.min(100, Math.round((totalKcal / kcalGoal) * 100));
+  const circ = 289.03;
+  document.getElementById('calRing').style.strokeDashoffset = circ - (calPct / 100) * circ;
+  document.getElementById('calPct').textContent = calPct + '%';
+  document.getElementById('totalKcal').textContent = totalKcal;
+  document.getElementById('remainKcal').textContent = Math.max(0, kcalGoal - totalKcal);
+  document.getElementById('calBar').style.width = calPct + '%';
+
+  // Macros
+  const targetProt = Math.round(kcalGoal * 0.30 / 4);
+  const targetCarb = Math.round(kcalGoal * 0.45 / 4);
+  const targetFat  = Math.round(kcalGoal * 0.25 / 9);
+  document.getElementById('sumProt').textContent = totalProt + 'g';
+  document.getElementById('sumCarb').textContent = totalCarb + 'g';
+  document.getElementById('sumFat').textContent  = totalFat  + 'g';
+  document.getElementById('sumItems').textContent = entries.length;
+  document.getElementById('protBar').style.width = Math.min(100, Math.round((totalProt/targetProt)*100)) + '%';
+  document.getElementById('carbBar').style.width = Math.min(100, Math.round((totalCarb/targetCarb)*100)) + '%';
+  document.getElementById('fatBar').style.width  = Math.min(100, Math.round((totalFat/targetFat)*100))  + '%';
+
+  // Water ring
+  const wPct = Math.min(100, Math.round((totalWml / WATER_GOAL) * 100));
+  const wCirc = 232.48;
+  document.getElementById('waterRing').style.strokeDashoffset = wCirc - (wPct / 100) * wCirc;
+  document.getElementById('waterPct').textContent = wPct + '%';
+  document.getElementById('waterTotal').textContent = totalWml >= 1000 ? (totalWml/1000).toFixed(1) + 'L' : totalWml + 'ml';
+  document.getElementById('waterRemain').textContent = Math.max(0, WATER_GOAL - totalWml) + 'ml';
+  document.getElementById('waterBar').style.width = wPct + '%';
+
+  // Sub header
+  document.getElementById('centerSub').textContent =
+    entries.length === 0 ? 'Nenhum registro ainda' :
+    entries.length + ' alimento' + (entries.length > 1 ? 's' : '') + ' · ' + totalKcal + ' kcal · ' + (totalWml >= 1000 ? (totalWml/1000).toFixed(1)+'L' : totalWml+'ml') + ' água';
+}
+
+function renderTimeline() {
+  const tl = document.getElementById('timeline');
+  const line = tl.querySelector('.timeline-line');
+  const empty = document.getElementById('emptyState');
+
+  // Merge food and water entries for timeline
+  const allEntries = [
+    ...entries.map(e => ({...e, _type:'food'})),
+    ...waterLog.map((w,i) => ({id:'w_'+i, time:w.time, ml:w.ml, _type:'water'}))
+  ].sort((a,b) => a.time.localeCompare(b.time));
+
+  if (allEntries.length === 0) {
+    empty.style.display = 'block';
+    // Remove existing items
+    tl.querySelectorAll('.tl-item').forEach(n => n.remove());
+    return;
+  }
+  empty.style.display = 'none';
+  tl.querySelectorAll('.tl-item').forEach(n => n.remove());
+
+  const typeColors = {p:'p',c:'c',f:'f',v:'v',o:'o'};
+  const tagLabels = {p:'Proteína',c:'Carboidrato',f:'Gordura',v:'Vegetal',o:'Outro'};
+
+  allEntries.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'tl-item';
+
+    if (e._type === 'water') {
+      div.innerHTML = `
+        <div class="tl-dot tl-dot-w"></div>
+        <div class="tl-card">
+          <div style="flex:1;">
+            <div class="tl-card-name" style="color:var(--blue-l);">💧 Água</div>
+            <div class="tl-card-qty">${e.ml}ml</div>
+          </div>
+          <span class="tl-tag tag-w">Água</span>
+          <div class="tl-time">${e.time}</div>
+        </div>`;
+    } else {
+      const t = e.type || 'o';
+      div.innerHTML = `
+        <div class="tl-dot tl-dot-${t}"></div>
+        <div class="tl-card">
+          <div style="flex:1;">
+            <div class="tl-card-name">${e.name}</div>
+            <div class="tl-card-qty">${e.qty || '—'}${e.prot||e.carb||e.fat ? ' · P:' + (e.prot||0) + 'g C:' + (e.carb||0) + 'g G:' + (e.fat||0) + 'g' : ''}</div>
+          </div>
+          ${e.kcal ? `<div class="tl-kcal">${e.kcal} kcal</div>` : ''}
+          <span class="tl-tag tag-${t}">${tagLabels[t]||'Outro'}</span>
+          <div class="tl-time">${e.time}</div>
+          <button class="log-delete" onclick="deleteEntry(${e.id})" title="Remover">✕</button>
+        </div>`;
+    }
+    tl.appendChild(div);
+  });
+}
+
+// ─── WATER SCHEDULE ──────────────────────────────────────────
+function buildWaterSchedule() {
+  renderWaterSchedule();
+}
+
+function renderWaterSchedule() {
+  const container = document.getElementById('waterSchedule');
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  container.innerHTML = WATER_SCHEDULE.map(slot => {
+    const [h, m] = slot.time.split(':').map(Number);
+    const slotMin = h * 60 + m;
+    const done = scheduleDone.has(slot.id);
+    const isNext = !done && slotMin >= nowMin && slotMin < nowMin + 90;
+    const isPast = !done && slotMin < nowMin;
+
+    let cls = 'water-slot';
+    if (done) cls += ' done';
+    else if (isNext) cls += ' next-up';
+    else if (isPast) cls += ' past';
+
+    return `
+      <div class="${cls}" onclick="toggleSchedule('${slot.id}', ${slot.ml})" title="${slot.note}">
+        <div class="water-chk">${done ? '✓' : ''}</div>
+        <div>
+          <div class="water-time-txt">${slot.time}</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:1px;">${slot.note.substring(0,18)}</div>
+        </div>
+        <div class="water-ml">${slot.ml}ml</div>
+      </div>`;
+  }).join('');
+}
+
+function updateWaterScheduleStatus() {
+  renderWaterSchedule();
+}
+
+function updateNextWater() {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const banner = document.getElementById('nextWaterBanner');
+  const timeEl = document.getElementById('nextWaterTime');
+  const noteEl = document.getElementById('nextWaterNote');
+
+  const next = WATER_SCHEDULE.find(slot => {
+    if (scheduleDone.has(slot.id)) return false;
+    const [h, m] = slot.time.split(':').map(Number);
+    return h * 60 + m >= nowMin;
+  });
+
+  if (next) {
+    const [h, m] = next.time.split(':').map(Number);
+    const diffMin = h * 60 + m - nowMin;
+    let diffText = diffMin <= 0 ? 'Agora!' : diffMin < 60 ? `em ${diffMin}min` : `em ${Math.round(diffMin/60)}h`;
+    timeEl.textContent = next.time;
+    noteEl.textContent = next.note + ' · ' + next.ml + 'ml · ' + diffText;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg, color='#7c6fe0') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.style.borderColor = color;
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// ─── ENTER KEY ───────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.id === 'foodName') {
+    addFood();
+  }
+});
+
+// ─── START ───────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
